@@ -48,6 +48,7 @@
 package org.egov.egf.web.actions.voucher;
 
 import org.apache.log4j.Logger;
+import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.ParentPackage;
 import org.apache.struts2.convention.annotation.Result;
@@ -80,6 +81,8 @@ import org.egov.utils.VoucherHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import com.opensymphony.xwork2.ActionContext;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -88,6 +91,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 
 @ParentPackage("egov")
 @Results({ @Result(name = JournalVoucherAction.NEW, location = "journalVoucher-new.jsp"),
@@ -173,6 +179,14 @@ public class JournalVoucherAction extends BaseVoucherAction
         }
         // setting the typa as default for reusing billvoucher.nextdesg workflow
         showMode = NEW;
+        Map<String, Object> session = ActionContext.getContext().getSession();
+        Object citymunicipalityname = session.get("citymunicipalityname");
+		HttpServletRequest request = ServletActionContext.getRequest();
+		final Date currDate = new Date();
+		final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        request.setAttribute("city", citymunicipalityname);
+        request.setAttribute("date", sdf.format(currDate));
+        request.setAttribute("vouchernumber", "test");
         if (LOGGER.isDebugEnabled())
             LOGGER.debug("JournalVoucherAction | new | End");
         return NEW;

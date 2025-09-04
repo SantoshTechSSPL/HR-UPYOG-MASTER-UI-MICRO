@@ -102,6 +102,86 @@
 }
 
 </style>
+<style>
+body {
+	font-family: Arial, sans-serif;
+	font-size: 14px;
+}
+
+.top-line {
+	text-align: center;
+	margin-bottom: 6px;
+}
+
+.voucher-title {
+	text-align: center;
+	font-weight: 700;
+	margin: 0 0 6px;
+	font-size: 16px;
+}
+
+.meta-row {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 6px;
+}
+
+.meta-row span {
+	white-space: nowrap;
+}
+
+table.voucher {
+	width: 100%;
+	border-collapse: collapse;
+	table-layout: fixed;
+}
+
+table.voucher th {
+	border: 1px solid #000;
+	text-align: center;
+	padding: 6px;
+}
+
+.num-row {
+	text-align: center;
+}
+
+.detail-row {
+	text-align: left;
+}
+
+table.voucher td {
+	border: 1px solid #000;
+	padding: 6px;
+}
+
+table.voucher th {
+	background: #f2e1b2; /* light green like the image */
+	font-weight: 700;
+}
+
+.num-row td {
+	font-weight: 600;
+}
+
+.detail-row td {
+	/* height: 130px; */
+} /* creates the large blank area */
+.left-total {
+	text-align: left;
+	padding-left: 10px;
+	font-weight: 700;
+}
+
+.table-contain {
+	margin: 20px;
+}
+
+.note {
+	font-size: 14px;
+	margin-top: 5px;
+}
+</style>
 <script>
 	function openSource(){
 		if("<s:property value='%{voucherHeader.vouchermis.sourcePath}' escapeHtml='false'/>"=="" || "<s:property value='%{voucherHeader.vouchermis.sourcePath}'/>"=='null')
@@ -291,11 +371,110 @@
 		<s:hidden id="vhid" name="vhid" value="%{voucherHeader.id}" />
 		<s:hidden id="id" name="id" value="%{voucherHeader.id}" />
 		<s:hidden id="contraId" name="contraId" value="%{contraVoucher.id}" />
+     <div id="main">
+		<div class="row">
+			<div class="col-md-12">
+				<div class="panel panel-primary" data-collapsed="0">
+					<div class="panel-heading" style="margin-bottom: 10px;">
+						<div class="panel-title text-center">
+							<span style="color: white; font-size: 21px">Journal Voucher</span>
+						</div>
+					</div>
+					<!--  Journal Voucher Start   -->
+					<div class="table-contain">
+						<div class="top-line">${city} Name
+							of the Municipality</div>
+						<div class="voucher-title">Journal Voucher</div>
 
+						<div class="meta-row">
+							<span>Name of the Fund: <s:property
+						value="%{getMasterName('fund')}" /></span> <span>Dated: ${date}</span>
+						</div>
+						<div class="meta-row">
+							<span>Journal Voucher Number: <s:property
+							value="%{voucherHeader.voucherNumber}" /></span>
+						</div>
+
+						<!-- Single bordered table for header, body, total, and sign/date rows -->
+						<table class="voucher">
+
+							<!-- Header -->
+							<thead>
+								<tr>
+									<th colspan="2">Budget</th>
+									<th rowspan="2">Code of Account</th>
+									<th rowspan="2">Account Description</th>
+									<th rowspan="2">Debit Amount (₹)</th>
+									<th rowspan="2">Credit Amount (₹)</th>
+								</tr>
+								<tr>
+									<th>Function</th>
+									<th>Functionary</th>
+								</tr>
+								<!-- numbers 1–4 row -->
+								<tr class="num-row">
+									<td>1</td>
+									<td>2</td>
+									<td>3</td>
+									<td>4</td>
+									<td>5</td>
+									<td>6</td>
+								</tr>
+							</thead>
+
+							<tbody>
+								<!-- Large blank entry area (single tall row like the image) -->
+				               <s:iterator var="p" value="%{billDetails.tempList}" status="s">
+								<tr class="detail-row">
+									<td><s:property value="function" /></td>
+									<td><s:property value="%{getMasterName('department')}" /></td>
+									<td><s:property value="glcode" /></td>
+									<td><s:property	value="accounthead" /></td>
+									<td><s:text name="format.number"><s:param value="%{debitamount}" /></s:text></td>
+									<td><s:text name="format.number"><s:param value="%{creditamount}" /></s:text></td>
+									<c:set var="db" value="${db+debitamount}" />
+									<c:set var="cr" value="${cr+creditamount}" />
+								</tr>
+                                </s:iterator>
+								<!-- Total row -->
+								<tr>
+									<td></td>
+									<td></td>
+									<td style="font-weight:bold;text-align:center;">Total</td>
+									<td>&nbsp;</td>
+									<td><fmt:formatNumber value="${db}" pattern="#0.00" /></td>
+									<td><fmt:formatNumber value="${cr}" pattern="#0.00" /></td>
+								</tr>
+
+								<!-- Signatures row -->
+								<tr>
+									<td></td>
+									<td></td>
+									<td>Prepared By</td>
+									<td>Verified By</td>
+									<td>Approved By</td>
+									<td>Posted By</td>
+								</tr>
+								<tr>
+									<td>&nbsp;</td>
+									<td>&nbsp;</td>
+									<td>Date</td>
+									<td>Date</td>
+									<td>Date</td>
+									<td>Date</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<!--  Journal Voucher ending   -->
+				</div>
+		    </div>
+		 </div>
+	 </div>
 
 
 	</s:form>
-
+     
 </body>
 
 </html>
