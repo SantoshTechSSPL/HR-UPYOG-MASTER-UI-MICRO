@@ -52,19 +52,187 @@
 <html>
 
 <title>Bank to Bank Transfer</title>
+<style>
+body {
+	font-family: Arial, sans-serif;
+	font-size: 14px;
+}
+
+.top-line {
+	text-align: center;
+	margin-bottom: 6px;
+}
+
+.voucher-title {
+	text-align: center;
+	font-weight: 700;
+	margin: 0 0 6px;
+	font-size: 16px;
+}
+
+.meta-row {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 6px;
+}
+
+.meta-row span {
+	white-space: nowrap;
+}
+
+table.voucher {
+	width: 100%;
+	border-collapse: collapse;
+	table-layout: fixed;
+}
+
+table.voucher th {
+	border: 1px solid #000;
+	text-align: center;
+	padding: 6px;
+}
+
+.num-row {
+	text-align: center;
+}
+
+.detail-row {
+	text-align: left;
+}
+
+table.voucher td {
+	border: 1px solid #000;
+	padding: 6px;
+}
+
+table.voucher th {
+	background: #f2e1b2; /* light green like the image */
+	font-weight: 700;
+}
+
+.num-row td {
+	font-weight: 600;
+}
+
+.detail-row td {
+	height: 130px;
+} /* creates the large blank area */
+.left-total {
+	text-align: left;
+	padding-left: 10px;
+	font-weight: 700;
+}
+
+.table-contain {
+	margin: 20px;
+}
+
+.note {
+	font-size: 14px;
+	margin-top: 5px;
+}
+</style>
+
 <body>
 	<span class="mandatory1">
 		<div id="Errors">
 			<s:actionerror />
 			<s:fielderror />
-		</div> 
+		</div>
 	</span>
-	</br>
-	<span style="color: green;font-size: 21px"><s:actionmessage /></span>
-	</br>
-	
-	<div align="center">
-		<input type="button" name="button2" id="button2" value="Close" class="btn btn-default" onclick="window.parent.postMessage('close','*');window.close();">
+	<div id="main">
+		<div class="row">
+			<div class="col-md-12">
+				<div class="panel panel-primary" data-collapsed="0">
+					<div class="panel-heading" style="margin-bottom: 10px;">
+						<div class="panel-title text-center">
+							<span style="color: white; font-size: 21px">Contra Voucher</span>
+						</div>
+					</div>
+					<span style="color: green; font-size: 16px"><s:actionmessage /></span>
+					<!--  Journal Voucher Start   -->
+					<div class="table-contain">
+						<div class="top-line">${city} Name of the Municipality</div>
+						<div class="voucher-title">Contra Voucher</div>
+
+						<div class="meta-row">
+							<span>Date: ${date}</span> <span>Contra Voucher Number :
+								${vouchernumber} </span>
+						</div>
+
+						<!-- Single bordered table for header, body, total, and sign/date rows -->
+						<table class="voucher">
+
+							<!-- Header -->
+							<thead>
+								<tr>
+									<th>Code of Account</th>
+									<th>Account Description</th>
+									<th>Debit Amount (₹)</th>
+									<th>Credit Amount (₹)</th>
+								</tr>
+								<!-- numbers 1–4 row -->
+								<tr class="num-row">
+									<td>1</td>
+									<td>2</td>
+									<td>3</td>
+									<td>4</td>
+								</tr>
+							</thead>
+
+							<tbody>
+								<!-- Large blank entry area (single tall row like the image) -->
+								<c:set var="totalDebit" value="0" />
+								<c:set var="totalCredit" value="0" />
+								<c:forEach var="ledger"
+									items="${glcode}">
+									<tr>
+										<td>${ledger.glcode}</td>
+										<td>${ledger.description}</td>
+										<td>${ledger.debitAmount}</td>
+										<td>${ledger.creditAmount}</td>
+									</tr>
+									 <!-- Add running totals -->
+								    <c:set var="totalDebit" value="${totalDebit + ledger.debitAmount}" />
+								    <c:set var="totalCredit" value="${totalCredit + ledger.creditAmount}" />
+								</c:forEach>
+								<!-- Total row -->
+								<tr>
+									<td colspan="2" style="font-weight:bold;text-align:center;">Total</td>
+									
+									<td><b>${totalDebit}</b></td>
+    								<td><b>${totalCredit}</b></td>
+								</tr>
+
+								<!-- Signatures row -->
+								<tr>
+									<td>Prepared By</td>
+									<td>Verified By</td>
+									<td>Approved By</td>
+									<td>Posted By</td>
+								</tr>
+								<tr>
+									<td>Date</td>
+									<td>Date</td>
+									<td>Date</td>
+									<td>Date</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<!--  Contra Voucher ending   -->
+				
+				</div>
+				<div class="text-center">
+					<input type="button" name="button2" id="button2" value="Close"
+						class="btn btn-default"
+						onclick="window.parent.postMessage('close','*');window.close();">
+				</div>
+			</div>
+		</div>
 	</div>
+
+
+
 </body>
 </html>

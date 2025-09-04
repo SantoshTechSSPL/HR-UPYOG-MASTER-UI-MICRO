@@ -50,9 +50,22 @@
  */
 package org.egov.egf.web.actions.contra;
 
-import com.exilant.GLEngine.ChartOfAccounts;
-import com.exilant.GLEngine.Transaxtion;
-import com.exilant.exility.common.TaskFailedException;
+import java.math.BigDecimal;
+import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.ParentPackage;
 import org.apache.struts2.convention.annotation.Result;
@@ -67,6 +80,7 @@ import org.egov.commons.CVoucherHeader;
 import org.egov.commons.EgwStatus;
 import org.egov.commons.Fund;
 import org.egov.commons.Vouchermis;
+import org.egov.commons.dao.ChartOfAccountsHibernateDAO;
 import org.egov.egf.commons.EgovCommon;
 import org.egov.egf.web.actions.voucher.BaseVoucherAction;
 import org.egov.infra.admin.master.entity.Department;
@@ -89,6 +103,7 @@ import org.egov.services.instrument.InstrumentService;
 import org.egov.services.payment.PaymentService;
 import org.egov.services.report.FundFlowService;
 import org.egov.services.voucher.ContraJournalVoucherService;
+import org.egov.services.voucher.GeneralLedgerService;
 import org.egov.services.voucher.VoucherService;
 import org.egov.utils.Constants;
 import org.egov.utils.FinancialConstants;
@@ -98,18 +113,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import java.math.BigDecimal;
-import java.sql.SQLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import com.exilant.GLEngine.ChartOfAccounts;
+import com.exilant.GLEngine.Transaxtion;
+import com.exilant.exility.common.TaskFailedException;
+import com.opensymphony.xwork2.ActionContext;
 
 /**
  * @author mani
@@ -178,6 +185,10 @@ public class ContraBTBAction extends BaseVoucherAction {
 	private CVoucherHeader voucherHeaderDes;
 	private CVoucherHeader voucherHeader4;
 	private ChartOfAccounts chartOfAccounts;
+	@Autowired
+    private ChartOfAccountsHibernateDAO chartOfAccountsHibernateDAO;
+	@Autowired
+	private GeneralLedgerService generalLedgerService;
 	@Autowired
 	private CreateVoucher createVoucher;
 	@Autowired
@@ -277,9 +288,37 @@ public class ContraBTBAction extends BaseVoucherAction {
            * ValidationException(Arrays.asList(new
            * ValidationError(e.getMessage(), e.getMessage()))); }
            */
+		 Map<String, Object> session = ActionContext.getContext().getSession();
+	        Object citymunicipalityname = session.get("citymunicipalityname");
+			HttpServletRequest request = ServletActionContext.getRequest();
+			final Date currDate = new Date();
+			final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+	        request.setAttribute("city", citymunicipalityname);
+	        request.setAttribute("date", sdf.format(currDate));
+	        request.setAttribute("vouchernumber", voucherHeader.getVoucherNumber());
+	        List<CGeneralLedger> cGeneralLedgerByVoucherHeaderId = generalLedgerService.findCGeneralLedgerByVoucherHeaderId(voucherHeader.getId());
+	        for(CGeneralLedger cGeneralLedger : cGeneralLedgerByVoucherHeaderId) {
+	        	CChartOfAccounts cChartOfAccountsByGlCode = chartOfAccountsHibernateDAO.getCChartOfAccountsByGlCode(cGeneralLedger.getGlcode());
+	        	cGeneralLedger.setDescription(cChartOfAccountsByGlCode.getName());
+	        }
+	        request.setAttribute("glcode", cGeneralLedgerByVoucherHeaderId);
+	       
 		return SUCCESS;
 	}
 
+	@SkipValidation
+	@Action(value = "/contra/contraBTB-newform")
+	public String newform() {
+		reset();
+		LoadAjaxedDropDowns();
+		loadDefalutDates();
+		final Date currDate = new Date();
+		final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		contraBean.setChequeDate(sdf.format(currDate));
+		contraBean.setModeOfCollection(MDC_OTHER);
+		voucherDate = new Date();
+		return NEW;
+	}
 	/**
 	 * @return edit page <br>
 	 *         Modifies the Bank to Bank Transfer ContraVoucher . &nbsp; &nbsp;
@@ -564,19 +603,7 @@ public class ContraBTBAction extends BaseVoucherAction {
 		return voucherTypeBean;
 	}
 
-	@SkipValidation
-	@Action(value = "/contra/contraBTB-newform")
-	public String newform() {
-		reset();
-		LoadAjaxedDropDowns();
-		loadDefalutDates();
-		final Date currDate = new Date();
-		final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-		contraBean.setChequeDate(sdf.format(currDate));
-		contraBean.setModeOfCollection(MDC_OTHER);
-		voucherDate = new Date();
-		return NEW;
-	}
+	
 
 	public String reset() {
 		voucherHeader.reset();
